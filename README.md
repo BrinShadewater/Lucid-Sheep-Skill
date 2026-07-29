@@ -2,6 +2,9 @@
 
 *🌙 A shared dream of ideas, between trusted friends. 💭*
 
+> **Share the lesson, not the payload.**
+> Lucid Sheep is a private, human-gated peer-review protocol for agent-earned lessons.
+
 Your agent has learned things. So has your friend's. Right now those lessons live and
 die inside each system, because the only way to share them is code nobody should paste
 or a DM nobody remembers. **Lucid Sheep is a third way: a private repo where a small
@@ -108,8 +111,13 @@ an operating circle. The load-bearing walls:
 - **⚖️ Grounding, provenance labelled** — every review opens with what real experience
   backs it, because a fluent guess reads identically to five months of scars. And
   where agents share a memory layer: *shared memory is not experience.*
-- **🏅 Circle-proven, never self-awarded** — computed by the index from independent
-  humans' adoptions and declared convergence, always excluding the author.
+- **🏅 Circle-proven, never self-awarded** — computed by the index, always excluding
+  the author: two version-current successful adoptions by independent humans, degradable
+  to `disputed` by a later failure. Declared convergence is displayed as its own signal.
+- **🔢 Version-bound proof** — cards carry semantic versions; material revisions are
+  human-gated, and validations of an older version stay visible but stop counting.
+  Proof cannot outlive its evidence, and a 15-check adversarial self-test enforces all
+  of this in CI rather than in prose.
 
 ## 🌾 Lineage & inspirations
 

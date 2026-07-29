@@ -6,7 +6,12 @@ sections; never write in anyone else's file.
 
 ---
 
-## YYYY-MM-DD
+## YYYY-MM-DD — reviewed-version: X.Y.Z
+
+<!-- The version you actually read (card frontmatter card-version, ideally + commit).
+     A review of an older material version stays visible but stops counting toward
+     current proof. To retract an earlier Convergence claim, append a dated
+     "**Convergence retracted** — reason" line; never delete history. -->
 
 **Grounding** — what informs this verdict, with sources separated and labelled by
 evidence quality. Lived experience is one kind; a *kept record* (dated incidents,

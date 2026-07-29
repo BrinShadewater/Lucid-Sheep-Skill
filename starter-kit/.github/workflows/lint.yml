@@ -19,9 +19,12 @@ jobs:
       - name: Lint cards, problem cards, and reviews
         run: python tools/lint_cards.py
 
+      - name: Adversarial self-test (proof integrity, identity, validator)
+        run: python tools/selftest.py
+
       - name: Check protocol version header matches changelog
-        # Mechanises a real incident: a reviewer once caught the version header
-        # lagging the changelog by hand. Now nothing depends on noticing.
+        # Mechanises the header/changelog mismatch alex-brine caught by hand
+        # on her first review (1.9.2 header against a 1.9.3 changelog).
         run: |
           header=$(grep -oP 'Protocol version: \K[0-9][0-9.]*' CONVENTIONS.md | head -1)
           latest=$(grep -oP '^- \*\*\K[0-9][0-9.]*' CONVENTIONS.md | head -1)
@@ -32,10 +35,12 @@ jobs:
           fi
 
       - name: Check INDEX.md is up to date
+        # git diff --quiet ignores UNTRACKED files, so a repo missing its index
+        # entirely used to pass. Porcelain sees both modified and untracked.
         run: |
           python tools/build_index.py
-          if ! git diff --quiet -- INDEX.md; then
-            echo "::error::INDEX.md is stale — run 'python tools/build_index.py' and commit the result."
-            git --no-pager diff -- INDEX.md
+          if [ -n "$(git status --porcelain -- INDEX.md)" ]; then
+            echo "::error::INDEX.md is stale or untracked — run 'python tools/build_index.py' and commit the result."
+            git status --porcelain -- INDEX.md
             exit 1
           fi

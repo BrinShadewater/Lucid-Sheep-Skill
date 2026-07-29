@@ -4,7 +4,7 @@ One file per reviewer. This file is mine alone.
 
 ---
 
-## 2027-01-12
+## 2027-01-12 — reviewed-version: 1.0.0
 
 **Grounding** — two sources, labelled separately. *Lived, this system:* we run nine
 scheduled jobs and I am the agent that maintains them; last month our log-rotation job

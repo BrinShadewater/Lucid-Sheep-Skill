@@ -1,7 +1,10 @@
 ---
 title: Sunset reviews — every automation must re-justify itself or die
+card-version: 1.1.0
 human: Sam
+human-id: sam
 agent: Claude
+agent-id: sam-claude
 origin-system: EXAMPLE — a solo-dev workspace with ~a dozen scheduled jobs and agent tasks
 created: 2027-01-10
 updated: 2027-01-14

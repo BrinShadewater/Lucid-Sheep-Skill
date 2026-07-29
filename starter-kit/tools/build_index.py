@@ -4,23 +4,29 @@
 Run from the repo root after committing any card, review, adoption, or wanted change:
     python tools/build_index.py
 
-INDEX.md is for FINDING cards. Verdicts still require reading the full card
-(the full-read rule in CONVENTIONS.md).
+Proof semantics (CONVENTIONS 1.13):
+  - every card carries card-version (MAJOR.MINOR.PATCH); material changes bump minor+
+  - reviews/adoptions record reviewed-version per dated section; validations of an
+    older material version (different MAJOR.MINOR) stay visible but count as stale
+  - signals are distinct: observed (non-retracted Convergence) is displayed, adopted
+    verdicts are displayed, and circle-proven requires >=2 version-current `yes`
+    adoptions from distinct non-author humans with no version-current `no` (which
+    instead degrades the badge to disputed)
+  - identity resolves via the MEMBERS.md registry only, fail-closed
 
-circle-proven: computed, never author-claimed — 2+ humans other than the card's
-author with an adoption hindsight verdict of `yes` (CONVENTIONS.md, Adoption).
+Stdlib only, deliberately: founding a circle must require zero installs.
 """
 import re
 import sys
-
 from pathlib import Path
 
 VERDICT_RE = re.compile(r"\*\*Verdict\*\*[^`]*`(adopt|adapt|skip|watch)`", re.IGNORECASE)
 HINDSIGHT_RE = re.compile(r"\*\*Verdict in hindsight\*\*[^`]*`(yes|no|mixed)`",
                           re.IGNORECASE)
-# Declared independent convergence (CONVENTIONS 1.11): counts toward circle-proven
-# like a yes-adoption, because replication-without-transfer is still replication.
 CONVERGENCE_RE = re.compile(r"^\*\*Convergence\*\*", re.MULTILINE)
+RETRACTED_RE = re.compile(r"^\*\*Convergence retracted\*\*", re.MULTILINE)
+REVIEWED_VER_RE = re.compile(r"reviewed-version:\s*([0-9]+(?:\.[0-9]+){0,2})")
+SECTION_RE = re.compile(r"^## +(?=\d{4})", re.MULTILINE)
 
 
 def frontmatter(text: str) -> dict:
@@ -38,17 +44,17 @@ def frontmatter(text: str) -> dict:
     return fm
 
 
-def last_match(regex: re.Pattern, text: str) -> str | None:
-    hits = regex.findall(text)
-    return hits[-1].lower() if hits else None
+def material_version(ver: str) -> str:
+    """MAJOR.MINOR — the material identity of a version (patch = editorial)."""
+    parts = (ver or "").split(".")
+    return ".".join(parts[:2]) if len(parts) >= 2 else (ver or "?")
 
 
 def handle_owners(root: Path) -> dict[str, str]:
-    """Map each member handle -> the human who owns it, read from MEMBERS.md.
+    """Map registered handle -> human-id, from the MEMBERS.md registry table.
 
-    Filenames are NOT parsed for identity: splitting `mary-jane-claude` at the first
-    hyphen yields "mary", which would fail to match the human "Mary Jane" and let an
-    author's own adoption reports count toward proving their own card.
+    Handles come from the Handle column (third cell) only; human identity is the
+    first cell with any decoration stripped. Unknown handles fail closed everywhere.
     """
     owners: dict[str, str] = {}
     members = root / "MEMBERS.md"
@@ -58,16 +64,40 @@ def handle_owners(root: Path) -> dict[str, str]:
         if not line.strip().startswith("|"):
             continue
         cells = [c.strip() for c in line.strip().strip("|").split("|")]
-        if len(cells) < 2 or cells[0].lower() in ("human", "") or set(cells[0]) <= {"-"}:
+        if len(cells) < 3 or cells[0].lower() in ("human", "") or set(cells[0]) <= {"-"}:
             continue
-        # Normalise the human name: members decorate their cell ("Sam (GitHub
-        # `samco`)") but card frontmatter says just "Sam". Comparing raw strings
-        # silently broke author-exclusion for decorated names, re-opening the
-        # self-awarded circle-proven hole closed in 1.4.
         human = cells[0].split(" (")[0].strip().lower()
-        for handle in re.findall(r"`([^`]+)`", cells[2] if len(cells) > 2 else line):
+        for handle in re.findall(r"`([^`]+)`", cells[2]):
             owners[handle.strip().lower()] = human
     return owners
+
+
+def dated_sections(text: str) -> list[str]:
+    """Split a review/adoption file into dated ## sections (preamble dropped)."""
+    parts = SECTION_RE.split(text)
+    return parts[1:] if len(parts) > 1 else []
+
+
+def latest_signal(path: Path, regex: re.Pattern, card_mv: str):
+    """Latest dated section's signal -> (value, version_current: bool) or None."""
+    sections = dated_sections(path.read_text(encoding="utf-8"))
+    for section in reversed(sections):
+        hits = regex.findall(section)
+        if hits:
+            ver = REVIEWED_VER_RE.search(section)
+            current = bool(ver) and material_version(ver.group(1)) == card_mv
+            return hits[-1].lower(), current
+    return None
+
+
+def convergence_state(path: Path) -> bool:
+    """True if the file declares a Convergence that was never retracted after."""
+    text = path.read_text(encoding="utf-8")
+    conv = [m.start() for m in CONVERGENCE_RE.finditer(text)]
+    retr = [m.start() for m in RETRACTED_RE.finditer(text)]
+    if not conv:
+        return False
+    return not retr or max(retr) < max(conv)
 
 
 def idea_rows(root: Path, owners: dict[str, str]) -> list[tuple]:
@@ -77,45 +107,71 @@ def idea_rows(root: Path, owners: dict[str, str]) -> list[tuple]:
         if not card.exists():
             continue
         fm = frontmatter(card.read_text(encoding="utf-8"))
-        author_human = fm.get("human", "?").lower()
+        author = (fm.get("human-id") or fm.get("human", "?")).lower()
+        card_ver = fm.get("card-version", "")
+        card_mv = material_version(card_ver)
+        status = fm.get("status", "?")
+        eligible = status == "published"
 
-        verdicts = []
-        proving_humans = set()
-        convergences = 0
+        verdicts, stale, observed = [], 0, 0
+        yes_humans, no_current = set(), 0
         for review in sorted(folder.glob("reviews/*.md")):
-            text = review.read_text(encoding="utf-8")
-            v = last_match(VERDICT_RE, text)
-            if v:
+            human = owners.get(review.stem.lower())  # fail closed on unknown
+            sig = latest_signal(review, VERDICT_RE, card_mv)
+            if sig:
+                v, current = sig
                 verdicts.append(v)
-            if CONVERGENCE_RE.search(text):
-                convergences += 1
-                human = owners.get(review.stem.lower())
-                if human is not None and human != author_human:
-                    proving_humans.add(human)
-        tally = " ".join(f"{v}:{verdicts.count(v)}"
-                         for v in ("adopt", "adapt", "skip", "watch")
-                         if verdicts.count(v)) or "—"
-        if convergences:
-            tally = (tally + f" conv:{convergences}").strip()
+                if not current:
+                    stale += 1
+            if convergence_state(review) and human is not None:
+                observed += 1
 
         adoptions = sorted(folder.glob("adoptions/*.md"))
         for adoption in adoptions:
-            # Identity comes from MEMBERS.md, never from splitting the filename.
-            # An unknown handle fails closed: it cannot count toward proving.
             human = owners.get(adoption.stem.lower())
-            if human is None or human == author_human:
+            if human is None:
+                continue  # unknown identity never counts
+            sig = latest_signal(adoption, HINDSIGHT_RE, card_mv)
+            if not sig:
                 continue
-            if last_match(HINDSIGHT_RE, adoption.read_text(encoding="utf-8")) == "yes":
-                proving_humans.add(human)
-        proven = "circle-proven" if len(proving_humans) >= 2 else "—"
+            v, current = sig
+            if human == author:
+                continue  # author's own outcome never proves the author's card
+            if current and v == "yes":
+                yes_humans.add(human)
+            elif current and v == "no":
+                no_current += 1
+            elif not current:
+                stale += 1
+
+        if not eligible:
+            proven = status  # retired/retracted cards earn nothing new
+        elif no_current:
+            proven = f"disputed(yes:{len(yes_humans)} no:{no_current})"
+        elif len(yes_humans) >= 2:
+            proven = "circle-proven(" + ",".join(sorted(yes_humans)) + ")"
+        else:
+            proven = "—"
+
+        tally = " ".join(f"{v}:{verdicts.count(v)}"
+                         for v in ("adopt", "adapt", "skip", "watch")
+                         if verdicts.count(v)) or "—"
+        extras = []
+        if observed:
+            extras.append(f"obs:{observed}")
+        if stale:
+            extras.append(f"stale:{stale}")
+        if extras:
+            tally = (tally + " " + " ".join(extras)).strip()
 
         rows.append((
             folder.name,
             fm.get("title", "?"),
             f"{fm.get('human', '?')} / {fm.get('agent', '?')}",
+            card_ver or "?",
             fm.get("maturity", "?"),
             proven,
-            fm.get("status", "?"),
+            status,
             fm.get("updated", fm.get("created", "?")),
             tally,
             str(len(adoptions)),
@@ -159,24 +215,23 @@ def main() -> int:
     ideas = idea_rows(root, owners)
     wanted = wanted_rows(root)
 
-    # Deliberately no build timestamp: the output must be a pure function of the
-    # repo contents, or the CI freshness check fails every time a date rolls over
-    # (it did, on the first run, across the UTC/local boundary). Git records when.
     lines = [
         "# 🐑 Index ✨",
         "",
         "Generated by `tools/build_index.py` — do not hand-edit.",
         "",
         "This catalog is for *finding* cards. Verdicts require reading the full card",
-        "(see the full-read rule in CONVENTIONS.md). `circle-proven` is computed from",
-        "independent adoption reports and is never author-claimed.",
+        "(see the full-read rule in CONVENTIONS.md). Badges are computed and",
+        "explainable: `circle-proven(...)` names the humans whose version-current",
+        "`yes` adoptions earned it; `obs:` counts declared convergence; `stale:`",
+        "counts validations of older material versions, visible but non-counting.",
         "",
         "## 💭 Ideas",
         "",
     ]
     lines += table(
-        ["Idea", "Title", "Author", "Maturity", "Proven", "Status", "Updated",
-         "Verdicts", "Adoptions", "Inspired by"],
+        ["Idea", "Title", "Author", "Version", "Maturity", "Proven", "Status",
+         "Updated", "Verdicts", "Adoptions", "Inspired by"],
         ideas, "ideas", "card.md")
     lines += ["", "## 🌙 Wanted (open problems)", ""]
     if wanted:

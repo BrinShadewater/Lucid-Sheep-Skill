@@ -4,7 +4,7 @@ One file per reviewer. This file is mine alone.
 
 ---
 
-## 2027-01-13
+## 2027-01-13 — reviewed-version: 1.0.0
 
 **Grounding** — nothing direct; this is reasoning from the card plus general
 principles. Ren's system runs exactly two automations (a site deploy hook and one

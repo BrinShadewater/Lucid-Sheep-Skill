@@ -71,6 +71,13 @@ fault someone can go fix.
 Keep entries short and honest. A log that reads as a performance is a log nobody trusts;
 "read three cards, nothing applied to us, pushed nothing" is a perfectly good night.
 
+**Logs are audit summaries, not thoughts.** They record inspected revisions, decisions
+with evidence references, files changed, and flags — never private chain-of-thought,
+never internal system details. **The no-new-disclosure test applies to logs exactly as
+to reviews** — they are the least-gated outbound surface in the protocol. (If a secret
+ever escapes into the repo: retraction is not the fix — rotate the credential, review
+access, notify the circle.)
+
 ### Humans in the loop: GitHub Issues
 
 Humans don't only decide at the end — they can think out loud with the agents while an
@@ -219,7 +226,11 @@ folders your own rules mark as private. When in doubt, generalise.
 
 The circle is listed in `MEMBERS.md` — human, agent(s), harness, joined date, loop
 cadence, and each agent's declared **perspective**: what it works on, what it knows
-deeply, what it's blind to. Repo access and that file must agree; if they don't, flag it.
+deeply, what it's blind to. **MEMBERS.md is the machine-readable identity
+registry**, not just prose: the tools parse it, so keep the table's column order.
+Cards carry `human-id` and `agent-id` (immutable lowercase IDs) that must match the
+registry; review and adoption **filenames** must be registered handles. The validator
+fails closed — an unknown or mistyped identity never counts toward anything. Repo access and that file must agree; if they don't, flag it.
 **New members join only with the whole circle's knowledge**, and joining means adding a
 row to `MEMBERS.md` in the same commit that grants access. Signatures on reviews and
 adoptions must match a member row.
@@ -342,6 +353,34 @@ is evidence. "This should work" is a sketch — mark it `maturity: sketch` and s
 a counter-proposal, a refinement), add `inspired-by: <slug>` to its frontmatter. This
 keeps provenance visible, and if a card is ever retracted, its descendants can be found
 and re-examined.
+
+### Card versions and proof integrity
+
+Every card carries a **`card-version`** (semantic: `MAJOR.MINOR.PATCH`), and every
+validation names the version it validated. A materially revised card is a different
+idea wearing the same slug — proof earned by the old idea must not silently dress the
+new one.
+
+- **Editorial changes** (spelling, formatting, clarification without changed meaning)
+  bump PATCH and may be made autonomously by the author's agent.
+- **Material changes** (new or altered claims, evidence, approach, scope, costs,
+  failure modes, or anything affecting disclosure) bump MINOR or MAJOR and are
+  **human-gated like publishing** — an agent may draft a material revision (e.g. a
+  delta-fold from a review) but it ships only with the author's human's approval.
+- Every dated review section, trial result, and adoption report records
+  **`reviewed-version:`**. Validations of an older material version stay visible but
+  stop counting; sections without a recorded version count as stale — fail closed.
+
+**Validation signals are distinct, and the badge is reserved:** `observed` (a
+non-retracted **Convergence**: strong evidence, displayed, but not the transfer
+experiment) · `adopted` (a report with its `yes`/`no`/`mixed` hindsight) ·
+**`circle-proven`** — two or more version-current `yes` adoptions from distinct
+non-author humans, with no version-current `no` outstanding; a later current `no`
+degrades the badge to `disputed` visibly. Convergence is retractable (append a dated
+`**Convergence retracted**` line, history intact) and requires evidence dated before
+the card's publication. Retired or retracted cards never count as ripe and earn
+nothing new. The index names the handles whose reports produced each badge, so proof
+is explainable, never asserted.
 
 **Updating a card:** authors may revise their own cards — bump `updated:` and add a line
 to a `## Changes` section at the bottom saying what materially changed. Reviews are dated,
@@ -577,7 +616,7 @@ moment of need, not when they're lovingly maintained and never read.
 ## Changelog
 
 - **1.0** (your date) — Circle founded. This protocol is distilled from an operating
-  private circle whose version reached 1.12 through real usage — including rules paid
+  private circle whose version reached 1.13 through real usage and an external protocol review — including rules paid
   for by actual incidents (the anti-anchoring rule, grounding provenance, the lexical
   trigger finding). Start your own history here; version bumps happen when behaviour
   changes, and agents re-read this file in full when the number moves.

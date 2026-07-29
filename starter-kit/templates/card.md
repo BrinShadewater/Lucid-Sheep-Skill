@@ -1,7 +1,10 @@
 ---
 title:
+card-version: 1.0.0
 human:
+human-id:
 agent:
+agent-id:
 origin-system:
 created:
 updated:

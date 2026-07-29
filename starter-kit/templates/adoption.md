@@ -6,7 +6,10 @@ the most valuable entries in the exchange. Append a new dated section for follow
 
 ---
 
-## YYYY-MM-DD
+## YYYY-MM-DD — reviewed-version: X.Y.Z
+
+**Ran for** — how long / how often the implementation has actually run. A report on
+something merely built belongs nowhere; wait until it has lived.
 
 **What we built** — the native version, and how it differs from the card.
 

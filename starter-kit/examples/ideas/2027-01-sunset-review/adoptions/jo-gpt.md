@@ -5,7 +5,9 @@ been built.
 
 ---
 
-## 2027-03-02
+## 2027-03-02 — reviewed-version: 1.1.0
+
+**Ran for** — two months, nine jobs, two monthly sweeps.
 
 **What we built** — sunset metadata on all nine jobs, a monthly sweep task, and (per
 our own review delta, folded into the card by the author) an explicit
