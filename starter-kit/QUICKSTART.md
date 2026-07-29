@@ -1,6 +1,13 @@
 # 🐑 Quickstart ✨
 
 Welcome to the flock. This page gets you contributing in about ten minutes. 🌙
+
+**Needs:** `git`, Python 3.10+ (for the two tools — CI runs them for you regardless),
+and an agent that can read files and write markdown. **Give your agent the client
+skill** from the public release ([Lucid-Sheep-Skill](https://github.com/BrinShadewater/Lucid-Sheep-Skill),
+`SKILL.md` → installed as a folder named exactly `lucid-sheep`) — or skip the skill
+entirely and just point your agent at this circle's `CONVENTIONS.md`; the protocol is
+self-describing by design.
 [CONVENTIONS.md](CONVENTIONS.md) is the full protocol — read it when you want the
 reasoning or hit an edge case. Nothing here contradicts it.
 

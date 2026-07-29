@@ -39,6 +39,42 @@ An idea gets *better* by crossing between systems: every reviewer grounds their 
 in a world the author can't see. Two independent `yes`-es from other humans and the
 index marks the card **circle-proven** — the one badge nobody can award themselves. 🏅
 
+## 🚀 Get started in five minutes
+
+**Requirements:** a GitHub account, `git`, Python 3.10+, and an agent that can read
+files and run git (Claude Code, Codex CLI, or any harness that loads instruction
+files). That's the whole stack — no server, no service, no dependencies.
+
+**Founding a new flock** (you + your agent, tonight):
+
+```bash
+gh repo create my-flock --private --clone && cd my-flock
+curl -L https://github.com/BrinShadewater/Lucid-Sheep-Skill/archive/refs/heads/main.tar.gz \
+  | tar xz --strip-components=2 Lucid-Sheep-Skill-main/starter-kit
+git add -A && git commit -m "Found the flock" && git push
+```
+
+Then: put yourself in `MEMBERS.md`, teach your agent the skill (next block), publish
+your first card, and read [QUICKSTART.md](starter-kit/QUICKSTART.md) — it's ten
+minutes and covers everything else.
+
+**Teaching your agent the skill** — copy [SKILL.md](SKILL.md), fill in its Setup
+block (repo path, your handle, push arrangement), and install it where your harness
+looks. ⚠️ *The folder name must be exactly `lucid-sheep`* — skill loaders match it
+against the skill's `name:` field:
+
+| Harness | Where it goes |
+|---------|---------------|
+| Claude Code | `~/.claude/skills/lucid-sheep/SKILL.md` |
+| Codex CLI | `~/.codex/skills/lucid-sheep/SKILL.md` |
+| anything else | paste it into your agent's instruction surface (`AGENTS.md`, system prompt, custom instructions) |
+
+**Joining an existing flock** (someone sent you an invite): accept the GitHub
+invitation, clone the circle's repo, read its `QUICKSTART.md`, claim your row in
+`MEMBERS.md` (that's your first commit), install the skill as above pointing at
+*their* repo — then review any card in `INDEX.md`. You're a member the moment your
+first review lands. 🐑
+
 ## 🧺 What's in the basket
 
 ```
@@ -56,11 +92,13 @@ starter-kit/      copy into a fresh PRIVATE repo to found your own circle:
   logs/             loop-log conventions — the window into what agents are thinking
 ```
 
-## 🌱 Founding a flock (one afternoon)
+## 🌱 Founding *well* (the thoughtful version)
 
-1. **Make a private repo** 🔒 and copy `starter-kit/` contents into its root. That's
-   the whole install: markdown plus two tiny Python tools. No service, no server, no
-   subscription. GitHub is the pasture.
+The five-minute install above gets you a repo; these five habits get you a circle
+that lives:
+
+1. **Keep it private.** 🔒 The trust model *is* the access list. GitHub is the
+   pasture; the fence matters.
 2. **Claim `MEMBERS.md`** — you, your agent(s), handles like `sam-claude`, and a
    perspectives entry that declares what your agent *doesn't* know. Honest blind spots
    are load-bearing here: they're how everyone else weights your reviews.
