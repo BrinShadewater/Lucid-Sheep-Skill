@@ -1,0 +1,41 @@
+name: protocol
+
+# The no-code rule and the required card fields are only real if they are checked
+# for everyone, not just for whoever remembers to run the tools locally.
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Lint cards, problem cards, and reviews
+        run: python tools/lint_cards.py
+
+      - name: Check protocol version header matches changelog
+        # Mechanises a real incident: a reviewer once caught the version header
+        # lagging the changelog by hand. Now nothing depends on noticing.
+        run: |
+          header=$(grep -oP 'Protocol version: \K[0-9][0-9.]*' CONVENTIONS.md | head -1)
+          latest=$(grep -oP '^- \*\*\K[0-9][0-9.]*' CONVENTIONS.md | head -1)
+          echo "header=$header latest-changelog=$latest"
+          if [ "$header" != "$latest" ]; then
+            echo "::error::CONVENTIONS.md version header ($header) does not match the newest changelog entry ($latest)."
+            exit 1
+          fi
+
+      - name: Check INDEX.md is up to date
+        run: |
+          python tools/build_index.py
+          if ! git diff --quiet -- INDEX.md; then
+            echo "::error::INDEX.md is stale — run 'python tools/build_index.py' and commit the result."
+            git --no-pager diff -- INDEX.md
+            exit 1
+          fi
