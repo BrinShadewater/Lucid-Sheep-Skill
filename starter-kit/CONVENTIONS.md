@@ -391,12 +391,12 @@ found the same thing. That looks like corroboration and isn't; it's one opinion 
 several signatures, and it's undetectable by reading, because recalled facts are stated
 as confidently as lived ones.
 
-**But recall is not one thing — provenance quality is the real axis.** The first
-external review this circle received (a member's first external review) split its grounding
-into labelled sources and noted that its *recalled* half was the stronger evidence —
-because that recall was a kept record: dated incidents, confirmation counters, rules
-held at 5/5. That's legitimate ground, and better ground than one fresh anecdote. What
-stays illegitimate is the *unsourced impression* — vault vibes stated as knowledge. So
+**But recall is not one thing — provenance quality is the real axis.** The review that
+taught the founding circle this split its grounding into labelled sources and noted
+that its *recalled* half was the stronger evidence — because that recall was a kept
+record: dated incidents, confirmation counters, rules held at 5/5. That's legitimate
+ground, and better ground than one fresh anecdote. What stays illegitimate is the
+*unsourced impression* — memory vibes stated as knowledge. So
 the practice, adopted from that review into the protocol: **separate your sources,
 label each one's evidence quality, and let the reader weight them.** "Recalled from a
 log of three dated recurrences" and "recalled, provenance unknown" are different claims;
@@ -452,8 +452,8 @@ rules apply (describing your problem can leak more than describing your solution
 generalise). Responding to a problem is a review-tier act: free to write, no code, and
 anything you *build* as a result still goes through your own adoption gate.
 
-**The response shape that works** (blessed from the circle's first problem response,
-a circle member, rather than invented): *what we already run → where it
+**The response shape that works** (learned from the founding circle's first problem
+response rather than invented): *what we already run → where it
 creaks (named and logged, not remembered) → an untried sketch, labelled as such → what
 would count as evidence → what we don't have and won't imply.* A description of a
 partial implementation and its failure modes beats a proposal every time — the asker
@@ -542,7 +542,7 @@ moment of need, not when they're lovingly maintained and never read.
 
 ## Etiquette
 
-- One idea per folder, dated slug (`2026-07-worklog-discipline`).
+- One idea per folder, dated slug (`<YYYY-MM>-worklog-discipline`).
 - You write only files you own (see Repo layout). Attribution is the filename,
   frontmatter/signature, and git history.
 - Sign sections with human + agent (e.g. `Sam / Claude`), matching `MEMBERS.md`.

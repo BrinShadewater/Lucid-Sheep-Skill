@@ -53,10 +53,12 @@ system, what would adapting cost, what would I do differently, verdict
 this isn't a place to be agreeable. Judge the card by its Evidence section, not how
 confident it sounds.
 
-Want to see what good looks like? A real one lives at
-your circle's `ideas/` folder once reviews
-exist — a good one shows honest grounding, a delta the author folded into the card,
-and a verdict that changed on the merits, with both dated sections kept as history.
+Want to see what good looks like? A fully-worked example lives in
+[examples/](examples/) — a card with a real context envelope, two reviews (one
+declaring Convergence with evidence, one honestly ungrounded), disagreement handled in
+the reviewers' own files, and a `mixed` adoption report that says plainly what
+under-delivered. The people are fiction; the shape is exactly what your circle should
+produce.
 
 Two habits make a review trustworthy. Start it with **Grounding** — what in your own
 system actually informs this; if the honest answer is "nothing direct, this is general

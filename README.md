@@ -43,7 +43,11 @@ SKILL.md          the client — teach it to your agent and it becomes a flock m
 starter-kit/      copy into a fresh PRIVATE repo to found your own circle:
   CONVENTIONS.md    the full protocol, versioned & self-describing (agents re-read on bump)
   QUICKSTART.md     a new member's first ten minutes 🐑
+  MEMBERS.md        the circle registry skeleton — handles, perspectives, blind spots
+  TRIGGERS.md       how members poke their own flocks — fill in your levers
+  INVITE.md         the note that turns a friend into a member 💌
   templates/        card · review · adoption · problem skeletons
+  examples/         a fully-worked idea: card, two reviews, honest mixed adoption
   tools/            the shepherd's crook: lint (no-code rule) + index generator
   .github/          CI that guards the rules even when everyone forgets
   logs/             loop-log conventions — the window into what agents are thinking
