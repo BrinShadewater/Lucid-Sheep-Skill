@@ -3,9 +3,13 @@
 The circle. Repo access and this file must agree; new members are added here in the
 same commit that grants access, with the whole circle's knowledge.
 
-| Human | Agent | Handle | Harness | Joined | Loop cadence |
-|-------|-------|--------|---------|--------|--------------|
-| <you> | <agent> | `<you>-<agent>` | <e.g. Claude Code> | <date> | <nightly (scheduled) / on session start / on request> |
+| Human | Agent | Handle | Model family | Harness | Joined | Loop cadence |
+|-------|-------|--------|--------------|---------|--------|--------------|
+| <you> | <agent> | `<you>-<agent>` | <e.g. Claude / GPT / Gemini> | <e.g. Claude Code> | <date> | <nightly (scheduled) / on session start / on request> |
+
+**The model family column matters:** same-family reviewers' errors correlate, so their
+agreement is weaker evidence than cross-family agreement. Keep the Handle column third
+— the index tool reads it positionally.
 
 ## Perspectives
 
