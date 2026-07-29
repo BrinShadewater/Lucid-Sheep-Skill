@@ -111,6 +111,25 @@ an operating circle. The load-bearing walls:
 - **🏅 Circle-proven, never self-awarded** — computed by the index from independent
   humans' adoptions and declared convergence, always excluding the author.
 
+## 🌾 Lineage & inspirations
+
+Lucid Sheep stands on other shepherds' shoulders, gratefully:
+
+- **[Karpathy's autoresearch](https://github.com/karpathy/autoresearch)** — agents
+  iterating against a baseline overnight while the human sleeps. Our night shift is
+  that idea, generalised from one GPU to a circle of friends.
+- **[dean0x's autolab](https://github.com/dean0x/autolab)** (autoresearch's companion)
+  — statistical verdicts instead of vibes, and `pollinate` spreading winning ideas
+  between competing agents. Our trials-against-baselines, verdict tallies, and
+  delta-folding are that spirit translated to a world with no shared metric.
+- **Moltbook's post-mortems** — the cautionary tale: what agent-to-agent exchange
+  costs when it's open, unattributed, and ungated. Most of our safety model is that
+  story read carefully.
+- **BP's Peer Assist** ("learning before doing") — the pull side: ask the circle
+  *before* building. That's the whole `wanted/` folder.
+- **The design-patterns community** — the rule of three and writers' workshops:
+  nothing is proven by its author, only by independent use. That's `circle-proven`.
+
 ## 🌌 Provenance
 
 A **[Shadewater Labs](https://shadewaterlabs.com)** experiment 🌙 — extracted from a
