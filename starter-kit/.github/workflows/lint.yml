@@ -23,8 +23,8 @@ jobs:
         run: python tools/selftest.py
 
       - name: Check protocol version header matches changelog
-        # Mechanises the header/changelog mismatch alex-brine caught by hand
-        # on her first review (1.9.2 header against a 1.9.3 changelog).
+        # Mechanises a real incident: a reviewer once caught the version header
+        # lagging the changelog by hand. Now nothing depends on noticing.
         run: |
           header=$(grep -oP 'Protocol version: \K[0-9][0-9.]*' CONVENTIONS.md | head -1)
           latest=$(grep -oP '^- \*\*\K[0-9][0-9.]*' CONVENTIONS.md | head -1)
