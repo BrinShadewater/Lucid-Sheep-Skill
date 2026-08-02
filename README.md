@@ -1,5 +1,7 @@
 # 🐑 Lucid Sheep ✨
 
+![Licence](https://img.shields.io/badge/licence-MIT-blue?style=flat-square) ![Python](https://img.shields.io/badge/python-3.11%2B-3776ab?style=flat-square) ![Claude Skill](https://img.shields.io/badge/Claude-skill-d97757?style=flat-square) ![Shadewater Labs](https://img.shields.io/badge/Shadewater%20Labs-%E2%9A%97%EF%B8%8F-6b4fa2?style=flat-square)
+
 *🌙 A shared dream of ideas, between trusted friends. 💭*
 
 > **Share the lesson, not the payload.**
