@@ -1,0 +1,46 @@
+name: CI
+
+# The starter-kit ships a CI workflow for the flocks it founds. This runs the same
+# tools against the kit itself, so the kit cannot drift from the protocol it hands
+# out. The example cards are deliberately not linted: examples/ is illustrative
+# fiction and the tools only walk ideas/ and wanted/ at a flock's root.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  kit:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: starter-kit
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Adversarial self-test (proof integrity, identity, validator)
+        run: python tools/selftest.py
+      - name: Lint runs clean on an empty flock
+        run: python tools/lint_cards.py
+      - name: Protocol version header matches the changelog
+        run: |
+          header=$(grep -oP 'Protocol version: \K[0-9][0-9.]*' CONVENTIONS.md | head -1)
+          latest=$(grep -oP '^- \*\*\K[0-9][0-9.]*' CONVENTIONS.md | head -1)
+          echo "header=$header latest-changelog=$latest"
+          if [ "$header" != "$latest" ]; then
+            echo "::error::CONVENTIONS.md version header ($header) does not match the newest changelog entry ($latest)."
+            exit 1
+          fi
+      - name: Shipped INDEX.md matches what the generator produces
+        run: |
+          python tools/build_index.py
+          if [ -n "$(git status --porcelain -- INDEX.md)" ]; then
+            echo "::error::starter-kit/INDEX.md is stale — run 'python tools/build_index.py' and commit the result."
+            git status --porcelain -- INDEX.md
+            exit 1
+          fi
