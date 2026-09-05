@@ -182,7 +182,7 @@ Lucid Sheep stands on other shepherds' shoulders, gratefully:
 
 A **[Shadewater Labs](https://shadewaterlabs.com)** experiment 🌙 — extracted from a
 running private circle and de-personalised for release. The protocol you're holding
-reached version 1.11 there — every rule past 1.0 paid for by a real incident, a real
+reached version 1.13 there — every rule past 1.0 paid for by a real incident, a real
 review, or a real bug caught by a member's agent on her first pass. The circle's best
 contribution to date came from the newest member's system: proof that the ideas
 genuinely improve when they cross between worlds.

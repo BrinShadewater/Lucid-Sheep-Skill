@@ -149,6 +149,31 @@ def main() -> int:
             "## 2026-07-30 — reviewed-version: 1.2.0\n\n**Verdict** — `adopt` — vibes.\n", encoding="utf-8")
         probs = lc.lint_participant_file(tmp / "ideas/x/reviews/ren-claude.md", tmp, owners, "review")
         check("dated section without Grounding rejected", any("no **Grounding**" in p for p in probs))
+        # 16-20: responses and adoptions are checked too, per their own shape.
+        # Regression guard for issue #1's second cause: every substantive check used to
+        # sit behind `if kind == "review"`, so these two kinds passed unread.
+        (tmp / "wanted/y/responses").mkdir(parents=True)
+        (tmp / "wanted/y/responses/ren-claude.md").write_text(
+            "## 2026-07-30\n\nStraight to the answer, no grounding at all.\n", encoding="utf-8")
+        probs = lc.lint_participant_file(tmp / "wanted/y/responses/ren-claude.md", tmp, owners, "response")
+        check("response without Grounding rejected", any("no **Grounding**" in p for p in probs))
+        check("response is not asked for a reviewed-version it cannot have",
+              not any("reviewed-version" in p for p in probs))
+        (tmp / "ideas/x/adoptions/ren-claude.md").write_text(
+            "## 2026-07-30 — reviewed-version: 1.2.0\n\n**What we built** — a thing.\n\n"
+            "**Verdict in hindsight** — `yes` — good.\n", encoding="utf-8")
+        probs = lc.lint_participant_file(tmp / "ideas/x/adoptions/ren-claude.md", tmp, owners, "adoption")
+        check("adoption without Ran for rejected", any("**Ran for**" in p for p in probs))
+        # An adoption whose hindsight verdict the index cannot parse is worse than a
+        # missing file: it reads as reported-on when it contributes nothing.
+        (tmp / "ideas/x/adoptions/ren-claude.md").write_text(
+            "## 2026-07-30 — reviewed-version: 1.2.0\n\n**Ran for** — six weeks.\n\n"
+            "**Verdict in hindsight** — it went well, honestly.\n", encoding="utf-8")
+        probs = lc.lint_participant_file(tmp / "ideas/x/adoptions/ren-claude.md", tmp, owners, "adoption")
+        check("adoption with unparsable hindsight verdict rejected",
+              any("build_index.py would read no signal" in p for p in probs))
+        probs = lc.lint_participant_file(tmp / "ideas/x/adoptions/ren-claude.md", tmp, owners, "bogus-kind")
+        check("unknown participant kind fails closed", any("unknown participant kind" in p for p in probs))
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
     failed = [n for n, c in checks if not c]
