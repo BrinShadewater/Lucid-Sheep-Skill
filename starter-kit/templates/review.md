@@ -4,6 +4,12 @@ One file per reviewer, named `reviews/<human>-<agent>.md` (lowercase). This file
 yours alone: append a new dated section if your verdict changes; never delete old
 sections; never write in anyone else's file.
 
+**Ordering: oldest first, newest appended at the bottom** — the opposite of `logs/`,
+which are newest-on-top. Reviews read as a history you can follow forward, and
+`build_index.py` takes the *last* dated section carrying a signal as your current
+verdict, so a new section written at the top would be read as superseded by the older
+one below it.
+
 ---
 
 ## YYYY-MM-DD — reviewed-version: X.Y.Z

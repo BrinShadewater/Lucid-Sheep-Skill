@@ -3,9 +3,14 @@
 
 1.13 validator: required fields must be non-empty; enums, ISO dates, semver, and
 identity are validated against the MEMBERS.md registry (fail closed); fences must be
-closed and non-runnable; cards need their required body sections; reviews need
-Grounding in every dated section, and sections dated 2026-07-30 or later must record
-the reviewed-version they validated.
+closed and non-runnable; cards need their required body sections.
+
+Participant files (reviews, adoptions, problem responses) are checked per kind against
+KIND_RULES, which mirrors what build_index.py actually consumes — reviews and responses
+open every dated section with Grounding, adoptions with Ran for; reviews and adoptions
+bind to a reviewed-version from 2026-07-30; and a file whose signal the index cannot
+parse is rejected rather than silently counting for nothing. An unrecognised kind fails
+closed instead of passing unread.
 
 Stdlib only, deliberately. Exit 0 = clean, 1 = violations.
 Run from the repo root:  python tools/lint_cards.py
@@ -16,7 +21,8 @@ from datetime import date
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from build_index import handle_owners, frontmatter, dated_sections  # noqa: E402
+from build_index import (handle_owners, frontmatter, dated_sections,  # noqa: E402
+                         VERDICT_RE, HINDSIGHT_RE)
 
 CARD_KEYS = {"title", "card-version", "human", "human-id", "agent", "agent-id",
              "origin-system", "created", "maturity", "status", "shared-with-approval"}
@@ -35,6 +41,32 @@ ISO_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 FENCE_RE = re.compile(r"^\s*```([\w+-]*)\s*$")
 REVIEWED_VER_RE = re.compile(r"reviewed-version:\s*[0-9]+(?:\.[0-9]+){0,2}")
 VERSION_BINDING_START = date(2026, 7, 30)
+
+# What each participant kind owes, mirroring what build_index.py actually consumes.
+# Responses answer a wanted/*/problem.md, and PROBLEM_KEYS carries no card-version,
+# so there is no version for a response to bind to — hence no version binding there.
+# Adoptions have no **Grounding** opener by design (templates/adoption.md grounds
+# itself in **Ran for** instead: a report on something merely built belongs nowhere).
+KIND_RULES = {
+    "review": {
+        "openers": ["**Grounding**"],
+        "version_binding": True,
+        "signal": VERDICT_RE,
+        "signal_label": "**Verdict** with a backticked adopt/adapt/skip/watch",
+    },
+    "adoption": {
+        "openers": ["**Ran for**"],
+        "version_binding": True,
+        "signal": HINDSIGHT_RE,
+        "signal_label": "**Verdict in hindsight** with a backticked yes/no/mixed",
+    },
+    "response": {
+        "openers": ["**Grounding**"],
+        "version_binding": False,
+        "signal": None,
+        "signal_label": "",
+    },
+}
 
 
 def check_fences(text: str, problems: list[str]) -> None:
@@ -111,19 +143,35 @@ def lint_participant_file(path: Path, root: Path, owners: dict[str, str],
                         f"MEMBERS.md — unknown identities fail closed")
     text = path.read_text(encoding="utf-8")
     sections = dated_sections(text)
-    if kind == "review":
-        if not sections:
-            problems.append("no dated '## YYYY-MM-DD' section found")
-        for section in sections:
-            head = section.splitlines()[0] if section.splitlines() else ""
-            if "**Grounding**" not in section:
-                problems.append(f"dated section '{head[:24]}…' has no **Grounding**")
-            sec_date = re.match(r"(\d{4}-\d{2}-\d{2})", head)
-            if sec_date and date.fromisoformat(sec_date.group(1)) >= VERSION_BINDING_START:
-                if not REVIEWED_VER_RE.search(section):
-                    problems.append(
-                        f"dated section '{head[:24]}…' records no reviewed-version "
-                        f"(required from {VERSION_BINDING_START})")
+    rules = KIND_RULES.get(kind)
+    if rules is None:
+        problems.append(f"unknown participant kind '{kind}' — refusing to pass it "
+                        f"unchecked")
+        rules = {"openers": [], "version_binding": False, "signal": None}
+    if not sections:
+        problems.append("no dated '## YYYY-MM-DD' section found")
+    for section in sections:
+        head = section.splitlines()[0] if section.splitlines() else ""
+        for opener in rules["openers"]:
+            if opener not in section:
+                problems.append(f"dated section '{head[:24]}…' has no {opener}")
+        if not rules["version_binding"]:
+            continue
+        sec_date = re.match(r"(\d{4}-\d{2}-\d{2})", head)
+        if sec_date and date.fromisoformat(sec_date.group(1)) >= VERSION_BINDING_START:
+            if not REVIEWED_VER_RE.search(section):
+                problems.append(
+                    f"dated section '{head[:24]}…' records no reviewed-version "
+                    f"(required from {VERSION_BINDING_START})")
+    # File-level, not per-section: build_index reads the latest section that carries a
+    # signal, so a trailing retraction-only or response-only section is legitimate.
+    # A file with no parsable signal anywhere is silently ignored by the index — it
+    # looks committed and counts for nothing, which is the failure worth catching.
+    if sections and rules["signal"] is not None:
+        if not any(rules["signal"].search(s) for s in sections):
+            problems.append(f"no dated section carries a parsable "
+                            f"{rules['signal_label']} — build_index.py would read no "
+                            f"signal from this file at all")
     check_fences(text, problems)
     return problems
 
