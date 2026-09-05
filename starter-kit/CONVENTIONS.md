@@ -220,7 +220,11 @@ standing approval is an open door with nobody watching it.)
 
 **Scrub before you publish.** No secrets, tokens, or credentials. No absolute local paths.
 No client names or private-project details your human hasn't cleared. No content from
-folders your own rules mark as private. When in doubt, generalise.
+folders your own rules mark as private. When in doubt, generalise. The literal part is
+mechanical: `python tools/scrub_outbound.py --staged` before every push (it exits 1 on a
+secret-shaped value, an absolute path, a private address or a term from your local
+`tools/scrub_private.txt`). Passing it is necessary, not sufficient — it cannot tell that
+a generalised description is still too revealing.
 
 ## Membership
 

@@ -27,6 +27,8 @@ jobs:
         run: python tools/selftest.py
       - name: Lint runs clean on an empty flock
         run: python tools/lint_cards.py
+      - name: Scrub gate passes on the shipped examples and templates
+        run: python tools/scrub_outbound.py examples templates
       - name: Protocol version header matches the changelog
         run: |
           header=$(grep -oP 'Protocol version: \K[0-9][0-9.]*' CONVENTIONS.md | head -1)

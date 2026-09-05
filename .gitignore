@@ -1,2 +1,4 @@
 __pycache__/
 *.pyc
+# each member's private-term list for tools/scrub_outbound.py; never shared
+starter-kit/tools/scrub_private.txt

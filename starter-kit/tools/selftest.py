@@ -12,6 +12,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import build_index as bi  # noqa: E402
 import lint_cards as lc   # noqa: E402
+import scrub_outbound as so  # noqa: E402
 
 CARD = """---
 title: t
@@ -174,6 +175,17 @@ def main() -> int:
               any("build_index.py would read no signal" in p for p in probs))
         probs = lc.lint_participant_file(tmp / "ideas/x/adoptions/ren-claude.md", tmp, owners, "bogus-kind")
         check("unknown participant kind fails closed", any("unknown participant kind" in p for p in probs))
+        # 21-24: the scrub gate catches the literal disclosures CONVENTIONS.md forbids,
+        # and nothing else. A gate that false-blocks gets bypassed.
+        secret = so.scan_text("api_key = sk-abcdefghijklmnopqrstuvwxyz1234\n", [])
+        check("scrub blocks a credential-shaped value", any(f["severity"] == "block" for f in secret))
+        path_hit = so.scan_text("see C:\\Users\\someone\\Projects\\thing\\notes.md and /home/someone/x\n", [])
+        check("scrub blocks absolute local paths", sum(f["kind"] == "absolute-path" for f in path_hit) == 2)
+        nightjar = so.re.compile(r"(?<![A-Za-z0-9])Project Nightjar(?![A-Za-z0-9])", so.re.I)
+        term_hit = so.scan_text("we built this for Project Nightjar last spring\n", [nightjar])
+        check("scrub blocks a listed private term", any(f["kind"] == "private-term" for f in term_hit))
+        clean = so.scan_text("A card about retry budgets: token=<redacted>, see docs/retries.md\n", [])
+        check("scrub passes clean prose and placeholders", not any(f["severity"] == "block" for f in clean))
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
     failed = [n for n, c in checks if not c]
